@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DICOM Web Viewer - C-FIND</title>
+</head>
+<body>
+    <h1>C-FIND</h1>
+    <form id="find-form">
+        <label for="find-host">Remote Host:</label>
+        <input type="text" id="find-host" name="remote_host" required>
+        <br>
+        <label for="find-port">Remote Port:</label>
+        <input type="number" id="find-port" name="remote_port" required>
+        <br>
+        <label for="find-patient-name">Patient Name:</label>
+        <input type="text" id="find-patient-name" name="query[('0010','0010')][value]">
+        <br>
+        <label for="find-study-date">Study Date:</label>
+        <input type="date" id="find-study-date" name="query[('0008','0020')][value]">
+        <br>
+        <button type="submit">Send C-FIND</button>
+    </form>
+    <a href="/">Back to Home</a>
+    <script src="app.js"></script>
+</body>
+</html>

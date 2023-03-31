@@ -1,5 +1,7 @@
 from pynetdicom import AE
-from pynetdicom.sop_class import Verification
+from pynetdicom.sop_class import PatientRootQueryRetrieveInformationModelFind
+from pydicom.dataset import Dataset
+
 
 class DicomNet:
     def __init__(self) -> None:
@@ -63,6 +65,11 @@ class DicomNet:
         except:
             print("Association not set, please create an association first")
         return 0
+
+    def writeQuery(self, patient_name, patient_id, study_instance_uid):
+        self.patientName = patient_name
+        self.patientID = patient_id
+        self.studyInstanceUID = study_instance_uid
 
     def cfind(self):
         print("This method has not been implemented yet")

@@ -7,8 +7,8 @@ dn.setAddress('127.0.0.1')
 dn.setPort(4242)
 dn.setCallerAET('MYPACS')
 
-dn.create_association()
+dn.setAssociation()
 
 dn.cecho()
 
-dn.release_association()
+dn.releaseAssociation()

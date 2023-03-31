@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request
-import pydicom
-import gdcm
-from services import c_echo, c_find
+from flask_bootstrap import Bootstrap5
+from services import DicomNet
 
 app = Flask(__name__)
+
+bootstrap = Bootstrap5(app)
 
 @app.route('/')
 def index():
@@ -21,7 +22,17 @@ def find():
 def api_echo():
     remote_host = request.form['remote_host']
     remote_port = int(request.form['remote_port'])
-    success = c_echo(remote_host, remote_port)
+    aetitle = request.form['aetitle']
+
+    dn = DicomNet()
+    dn.setAddress(remote_host)
+    dn.setPort(remote_port)
+    dn.setCallerAET(aetitle)
+    dn.setAssociation()
+    success = dn.cecho()
+    print(success)
+    dn.releaseAssociation()
+
     return {'success': success}
 
 @app.route('/api/find', methods=['POST'])
@@ -34,7 +45,7 @@ def api_find():
         group = tag[0][1:-1]
         element = tag[1][1:-1]
         query[(group, element)] = {'vr': 'PN', 'value': value}
-    result = c_find(remote_host, remote_port, query)
+    result = cfind(remote_host, remote_port, query)
     return {'result': result}
 
 if __name__ == '__main__':

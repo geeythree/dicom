@@ -21,6 +21,35 @@
         <button type="submit">Send C-FIND</button>
     </form>
     <a href="/">Back to Home</a>
-    <script src="app.js"></script>
+    <script type="text/javascript">
+        const findForm = document.querySelector('#find-form');
+        if (findForm) {
+            findForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                const result = await fetch('/api/find', {
+                    method: 'POST',
+                    body: formData,
+                }).then(response => response.json());
+                const resultTable = document.createElement('table');
+                const headerRow = resultTable.insertRow();
+                const studyDateHeader = headerRow.insertCell();
+                studyDateHeader.innerText = 'Study Date';
+                const patientNameHeader = headerRow.insertCell();
+                patientNameHeader.innerText = 'Patient Name';
+                for (const study of result) {
+                    const row = resultTable.insertRow();
+                    const studyDateCell = row.insertCell();
+                    studyDateCell.innerText = study['(0008,0020)'].Value[0];
+                    const patientNameCell = row.insertCell();
+                    patientNameCell.innerText = study['(0010,0010)'].Value[0];
+                }
+                const resultContainer = document.querySelector('#result-container');
+                resultContainer.innerHTML = '';
+                resultContainer.appendChild(resultTable);
+            });
+        }
+
+    </script>
 </body>
 </html>

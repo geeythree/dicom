@@ -12,10 +12,29 @@
         <label for="echo-port">Remote Port:</label>
         <input type="number" id="echo-port" name="remote_port" required>
         <br>
+        <label for="echo-port">AE Title</label>
+        <input type=""text id="echo-aetitle" name="aetitle">
+        <br>
         <button type="submit">Send C-ECHO</button>
     </form>
     <a href="/">Back to Home</a>
-    <script type="text/javascript" src="url_for('static/js', filename='app.js')"></script>
+    <script type="text/javascript">
+        const echoForm = document.querySelector('#echo-form');
+
+        if (echoForm) {
+            echoForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                console.log(formData)
+                const result = await fetch('/api/echo', {
+                    method: 'POST',
+                    body: formData,
+                }).then(response => response.json());
+                //console.log(response)
+                alert(result.success ? 'C-ECHO successful!' : 'C-ECHO failed!');
+            });
+        }
+    </script>
 </body>
 </html>
 

@@ -1,80 +1,70 @@
-import gdcm
-import socket
+from pynetdicom import AE
+from pynetdicom.sop_class import Verification
 
-def c_echo(remote_host, remote_port):
-    # Create a TCP/IP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+class DicomNet:
+    def __init__(self) -> None:
+        self.address = str()
+        self.port = int()
+        self.callerAET = str('MYPACS')
+        self.calledAET = str()
 
-    # Connect the socket to the remote host and port
-    server_address = (remote_host, remote_port)
-    sock.connect(server_address)
+    def setAddress(self, remote_host):
+        self.address = remote_host
 
-    # Create a GDCM network object
-    network = gdcm.Network()
+    def setPort(self, remote_port):
+        self.port = remote_port
 
-    # Create a CEcho object
-    echo = gdcm.CEcho()
+    def setCallerAET(self, callerAET):
+        if callerAET != '':
+            # cannot have empty string as AE Ttile
+            self.callerAET = callerAET
 
-    # Set the transfer syntax to use
-    echo.SetTransferSyntax(gdcm.TransferSyntax.ImplicitVRLittleEndian)
+    def setCalledAET(self, calledAET):
+        if calledAET != '':
+            # cannot have empty string as AE Ttile
+            self.calledAET = calledAET
 
-    # Send the C-ECHO request and wait for the response
-    response = network.CEcho(echo, sock)
-
-    # Close the socket
-    sock.close()
-
-    # Check if the C-ECHO was successful
-    if response.GetCEchoStatus() == gdcm.CEchoStatus.Success:
-        print("C-ECHO successful!")
-    else:
-        print("C-ECHO failed!")
-
-def c_find(remote_host, remote_port, query):
-    # Create a TCP/IP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Connect the socket to the remote host and port
-    server_address = (remote_host, remote_port)
-    sock.connect(server_address)
-
-    # Create a GDCM network object
-    network = gdcm.Network()
-
-    # Create a CFind object
-    find = gdcm.CFind()
-
-    # Set the transfer syntax to use
-    find.SetTransferSyntax(gdcm.TransferSyntax.ExplicitVRLittleEndian)
-
-    # Set the query
-    find.SetQuery(query)
-
-    # Send the C-FIND request and iterate over the responses
-    responses = network.CFind(find, sock)
-    for response in responses:
-        if response.GetCFindStatus() == gdcm.CFindStatus.Pending:
-            continue
-        elif response.GetCFindStatus() == gdcm.CFindStatus.Success:
-            # Process the response
-            dataset = response.GetDataSet()
-            print("Received response:")
-            for tag in dataset.GetKeys():
-                element = dataset.GetDataElement(tag)
-                print("{}: {}".format(tag, element.GetByteValue()))
+    def setAssociation(self) -> None:
+        if not self.address == '' and not self.port == '':
+            assoc_entity = AE()
+            assoc_entity.add_requested_context(Verification)
         else:
-            print("C-FIND failed!")
+            print("Address or Port is empty")
+        try:
+            self.assoc = assoc_entity.associate(addr=self.address, 
+                                                port=self.port, 
+                                                ae_title=self.callerAET)
+        except Exception as e:
+            print(f"Creating Association: {e}")
+        print("Association created successfully")
 
-    # Close the socket
-    sock.close()
+    def releaseAssociation(self) -> None:
+        try:
+            self.assoc.release()        
+        except Exception as e:
+            print(e)
+            print("Association not released")
+            exit()
+        print("Association released successfully")
 
-if __name__ == '_main__':
-    remote_host = '127.0.0.1'
-    remote_port = 104
-    
-    c_echo(remote_host, remote_port)
 
-    query = gdcm.DataSet()
-    query.Insert(gdcm.Tag(0x0008, 0x0052), gdcm.DataElement(gdcm.Tag(0x0008, 0x0052)))
-    
-    c_find(remote_host, remote_port, query)
+    def cecho(self):
+        try:
+            if self.assoc.is_established:
+                status = self.assoc.send_c_echo()
+                if status:
+                    # If the verification request succeeded this will be 0x0000
+                    print('C-ECHO request status: PASSED \nStatus code: 0x{0:04x}'.format(status.Status))
+                    return 1
+                else:
+                    print('Connection timed out, was aborted or received invalid response')
+            else:
+                print("No association has been established")
+        except:
+            print("Association not set, please create an association first")
+        return 0
+
+    def cfind(self):
+        print("This method has not been implemented yet")
+        pass
+

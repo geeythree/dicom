@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DICOM Web Viewer</title>
+    {% block head %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+        {% endblock %}
+
+        <title>DICOM Web Viewer</title>
+        {% endblock %}
+    {{ bootstrap.load_css() }}
 </head>
 <body>
     <h1>DICOM Web Viewer</h1>
     <a href="/echo">C-ECHO</a>
     <a href="/find">C-FIND</a>
+    {{ bootstrap.load_js() }}
 </body>
 </html>

@@ -1,5 +1,5 @@
 from pynetdicom import AE
-from pynetdicom.sop_class import PatientRootQueryRetrieveInformationModelFind
+from pynetdicom.sop_class import PatientRootQueryRetrieveInformationModelFind, Verification
 from pydicom.dataset import Dataset
 
 
@@ -72,6 +72,11 @@ class DicomNet:
         self.studyInstanceUID = study_instance_uid
 
     def cfind(self):
-        print("This method has not been implemented yet")
-        pass
+        self.assoc.add_requested_context(PatientRootQueryRetrieveInformationModelFind)
+
+        ds=Dataset()
+        if self.patientName != '':
+            ds.PatientName = self.patientName
+        
+
 
